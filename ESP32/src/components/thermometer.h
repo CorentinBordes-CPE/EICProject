@@ -29,7 +29,6 @@ class Thermometer {
         typedef void (*CallbackFunction)(float, float);
         CallbackFunction m_on_change = nullptr;
 
-
     public:
         static Thermometer *get();
         CallbackFunction getOnChange();

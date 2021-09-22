@@ -1,0 +1,28 @@
+#pragma once
+
+#ifndef wifi_h
+#define wifi_h
+
+/////////////////////////////////////////////////////////////////
+
+#include "Arduino.h"
+#include <BLEScan.h>
+
+/////////////////////////////////////////////////////////////////
+
+class Wifi {
+    private:
+        static Wifi *wifi;
+        Wifi();
+       
+    public:
+        static Wifi *get();
+        bool verify_connection();
+        void sendMqtt(std::string topic, float message);
+        void loop();
+};
+
+
+/////////////////////////////////////////////////////////////////
+#endif
+/////////////////////////////////////////////////////////////////
