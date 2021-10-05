@@ -65,6 +65,8 @@ IP4_ADDR(&server_ip, 192,168,1,122);
 
 ## 1. Récupération des données du capteur avec la carte ESP32
 
+#### Contexte
+
 Dans cette partie, nous avons utilisés PlatformIO comme extension de l'IDE Visual Studio Code, dans le but de pouvoir flash notre code sur la carte ESP32. Le code flashé sur la carte permet de récupérer les trames d'advertising Bluetooth Low Energy (BLE) du capteur, de les filtrer et de les traiter pour récupérer les valeurs de températures et d'humidité.
 La carte enverra ensuite les données sur un topic MQTT : 
 
@@ -73,14 +75,41 @@ La carte enverra ensuite les données sur un topic MQTT :
 
 Pour ce faire, elle utilise la Wi-Fi pour envoyer les données vers le serveur MQTT.
 
+#### Fonctionnement du code
+
+Le main.cpp à deux méthodes : celle de setup des variables et celle qui permet de faire boucler le code sur la carte.
+Dans le setup, nous créons un thread pour la gestion du bluetooth avec un listener qui enverra les données en Wi-Fi lors de leur réception.
+Les boutons sur la carte ne sont pas attribués mais peuvent être utilisés dans le cadre d'une amélioration via les deux handlers dans le code.
+
 ## 2. Mise en place du serveur
 
 Pour cette partie, nous avons utilisés le brocker de message Mosquitto. Il suffit simplement de lancer le serveur sur une machine du réseau et de récupérer son IP. L'IP est utilisé pour le paramétrage expliqué plus haut.
 
 ## 3. Mise en place de la récupération des données sur le serveur MQTT
 
+#### Contexte
+
 La carte STM32 va pouvoir s'abonner aux topics NB-CB_temperature et NB_CB_humidity sur lesquels sont publiées les valeurs de température et d'humidité.
 Le code que nous avons créé se base sur celui des exemples fournis par l'IDE STM32CubeIDE se nommant LWIP. Notre code est contenu dans les fichiers du répertoire "LwIP_HTTP_Server_Netcon_RTOS".
+
+#### Fonctionnement du code
+
+Le fichier main.c crée un thread nommé start. Celui-ci va lancer un nouveau thread DHCP qui communiquera avec le serveur DHCP. Une fois son adresse IP attribuée, il commencera à récupérer les données de température et d'humidité via un nouveau thread nommé MQTT.
+
+**Attention** : Sur les STM32, les threads sont synchrones, il faut donc rajouter un "osDelay" qui correspond au temps accordé aux autres threads pour s'exécuter.
+
+le fichier app_ethernet.c contient toutes les méthodes liées aux protocoles DHCP et MQTT.
+
+## 4. Utilisation d'un servomoteur
+
+#### Contexte
+
+Même si ce système n'est pas mis en place dans ce projet, le servomoteur est la condition qui permet de gérer l'ouverture de la ventilation en fonction de la température et de l'humidité. Le code permettant de calculer la nécessité de l'ouverture en fonction des valeurs doit se trouver sur la carte STM32. Le servomoteur sera connecté au pins du microcontrolleur pour ordonner la rotation.
+
+#### Fonctionnement théorique du code
+
+Il faut utiliser une des horloges internes de la carte pour ne pas utiliser de timer logiciel. afin de faire bouger le servomoteur comme attendu, il faut appeler une méthode de déclenchement en modifiant les paramètres pour l'horloge (diviseur, temps à l'état haut,...).  
+
 
 ## Problèmes rencontrés
 
