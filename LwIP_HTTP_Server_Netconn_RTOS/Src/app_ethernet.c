@@ -225,10 +225,10 @@ static void mqtt_connection_cb(mqtt_client_t *client, void *arg, mqtt_connection
   if(status == MQTT_CONNECT_ACCEPTED) {
 	  LCD_UsrLog("mqtt_connection_cb: Successfully connected\n");
 
-	err = mqtt_subscribe(client, "JGD-OPT_temperature", 0, mqtt_sub_request_cb, arg);
-	LCD_UsrLog((char *)"subscribe topic JGD-OPT_temperature: %d\n", err);
-	err = mqtt_subscribe(client, "JGD-OPT_humidity", 0, mqtt_sub_request_cb, arg);
-	LCD_UsrLog((char *)"subscribe topic JGD-OPT_humidity: %d\n", err);
+	err = mqtt_subscribe(client, "NB-CB_temperature", 0, mqtt_sub_request_cb, arg);
+	LCD_UsrLog((char *)"subscribe topic NB-CB_temperature: %d\n", err);
+	err = mqtt_subscribe(client, "NB-CB_humidity", 0, mqtt_sub_request_cb, arg);
+	LCD_UsrLog((char *)"subscribe topic NB-CB_humidity: %d\n", err);
 	mqtt_set_inpub_callback(client, mqtt_incoming_publish_cb, mqtt_incoming_data_cb, arg);
 
     if(err != ERR_OK) {
