@@ -18,12 +18,13 @@ char buff[512];
 //Wifi configuration
 const char* ssid = "esp-4";
 const char* password =  "Azeqsdwxc123";
+const char* ipMQTT = "192.168.136.232";
 
 //MQTT configuration
 EspMQTTClient client(
   ssid,
   password,
-  "192.168.136.232",  // MQTT Broker server ip
+  ipMQTT,  // MQTT Broker server ip
   "",   // Can be omitted if not needed
   "",   // Can be omitted if not needed
   "Nathan",     // Client name that uniquely identify your device
