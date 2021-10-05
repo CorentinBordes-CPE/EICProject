@@ -12,11 +12,11 @@ Ces équipements vous permettront, à moindre coût, de réaliser cette installa
 
 ## Communications :
 
-```mermaid
-Communication protocol;
-Sensor-->|BLE|ESP32;
-ESP32-->|UART|PC;
-PC-->|WIFI|switch;
-switch-->|ETHERNET|STM32;
+```mermaid 
+graph
+Sensor-->ESP32
+ESP32-->PC
+PC-->switch
+switch-->STM32
 STM32-->servomotor
 ```
