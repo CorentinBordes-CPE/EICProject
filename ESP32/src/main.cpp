@@ -40,8 +40,8 @@ void setup()
 		Serial.printf("temp = %f, humidity = %f \n", temp, humidity);
 		
 		if(wifi->verify_connection()){
-			wifi->sendMqtt("nathan/temp", temp);
-			wifi->sendMqtt("nathan/humidity", humidity);
+			wifi->sendMqtt("NB-CB_temperature", temp);
+			wifi->sendMqtt("NB-CB_humidity", humidity);
 		}
 	});
 
