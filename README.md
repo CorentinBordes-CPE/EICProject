@@ -73,12 +73,21 @@ La carte enverra ensuite les données sur un topic MQTT :
 
 Pour ce faire, elle utilise la Wi-Fi pour envoyer les données vers le serveur MQTT.
 
-## 2. Mise en place du serveur 
+## 2. Mise en place du serveur
 
 Pour cette partie, nous avons utilisés le brocker de message Mosquitto. Il suffit simplement de lancer le serveur sur une machine du réseau et de récupérer son IP. L'IP est utilisé pour le paramétrage expliqué plus haut.
 
 ## 3. Mise en place de la récupération des données sur le serveur MQTT
 
-
+La carte STM32 va pouvoir s'abonner aux topics NB-CB_temperature et NB_CB_humidity sur lesquels sont publiées les valeurs de température et d'humidité.
+Le code que nous avons créé se base sur celui des exemples fournis par l'IDE STM32CubeIDE se nommant LWIP. Notre code est contenu dans les fichiers du répertoire "LwIP_HTTP_Server_Netcon_RTOS".
 
 ## Problèmes rencontrés
+
+L'installation des différents IDE peut entrainer différents problèmes.
+
+**Attention** : Lors de la création d'un projet sur STM32CubeIDE, l'installation des dépendences peut ne pas fonctionner si le répertoire de destination n'est pas correctement créé, et il se peut donc que vous deviez le créer à la main.
+
+De même, l'installation du plug-in PlatformIO sur VS Code peut entrainer des problèmes selon les droits dont vous disposez ainsi que l'espace mémoire.
+
+Finalement, dans le code de la carte STM32, si vous n'arrivez pas à vous connecter via le serveur DHCP, veuillez changer l'adresse MAC de votre carte en gardant le premier paramètre "2U".
