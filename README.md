@@ -1,5 +1,8 @@
 # Création d'une installation domotique de gestion de température et d'humidité dans une salle de bain
 
+## Video
+https://youtu.be/zlMbF_yxeT0
+
 ## Matériel
 Pour la mise en place de ce système, nous utiliserons :
 
