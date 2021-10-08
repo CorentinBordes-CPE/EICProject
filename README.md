@@ -1,3 +1,4 @@
+
 # Création d'une installation domotique de gestion de température et d'humidité dans une salle de bain
 
 ## Video
@@ -6,17 +7,48 @@ https://youtu.be/zlMbF_yxeT0
 ## Matériel
 Pour la mise en place de ce système, nous utiliserons :
 
-	- Un capteur de température et d'humidité doté d'un système de communication BLE (capteur 'Mi Temperature and humidity' de Xiaomi, modèle LYWSDCGQ/01ZM ),
-	- Microcontrolleur ESP32 Lilygo TTGO T-Display,
-	- Carte STM32F746NG de STMicroelectronics,
-	- Un servomoteur,
-	- Un routeur / switch.
+- Un capteur de température et d'humidité doté d'un système de communication BLE (capteur 'Mi Temperature and humidity' de Xiaomi, modèle LYWSDCGQ/01ZM ),
+- Microcontrolleur ESP32 Lilygo TTGO T-Display,
+- Carte STM32F746NG de STMicroelectronics,
+- Un servomoteur,
+- Un routeur / switch.
 
 Ces équipements vous permettront, à moindre coût, de réaliser cette installation.
 
-## Communications :
+## Schéma d'architecture
 
-### Systèmes de communication internes
+```mermaid
+  graph LR
+      Thermomètre/Hydromètre-->ESP32
+      ESP32-->Broker
+      Broker-->STM32
+      STM32-->Servomoteur      
+```
+## Diagramme de séquence
+
+```mermaid
+sequenceDiagram
+    participant Thermomètre
+    participant ESP32
+    participant Broker
+    participant STM32
+    participant Servomoteur
+    autonumber
+    
+    ESP32->>Thermomètre: Récupération de l'Advertiser
+    loop
+        ESP32->>ESP32: Extraction des données
+    end
+    ESP32->>Broker: Publish
+    STM32->>Broker: Subscribe
+    Broker->>STM32: Transmission des topics
+    loop 
+        STM32->>STM32: Traitement
+    end
+    STM32->>Servomoteur: Commande le servomoteur
+```
+
+## Moyens de communications 
 
 ```mermaid 
 graph
@@ -25,15 +57,6 @@ Sensor-->|BLE|ESP32
 ESP32-->|WI-FI|switch
 switch-->|ETHERNET|STM32
 STM32-->servomotor
-```
-### Serveur MQTT
-
-```mermaid 
-graph
-MQTTServer-->ESP32
-ESP32-->|PUBLISH|MQTTServer
-MQTTServer-->STM32
-STM32-->|SUBSCRIBE|MQTTServer
 ```
 
 ## Mise en place
@@ -71,6 +94,19 @@ IP4_ADDR(&server_ip, 192,168,1,122);
 #### Contexte
 
 Dans cette partie, nous avons utilisés PlatformIO comme extension de l'IDE Visual Studio Code, dans le but de pouvoir flash notre code sur la carte ESP32. Le code flashé sur la carte permet de récupérer les trames d'advertising Bluetooth Low Energy (BLE) du capteur, de les filtrer et de les traiter pour récupérer les valeurs de températures et d'humidité.
+Le capteur envoie 3 trames d'advertising différentes:
+
+- Une trame avec seulement la température
+- Une trame avec seulement l'humidité
+- Une trame avec les deux
+
+Nous utiliserons seulement la dernière. Le filtre se base sur le 18ème octet de chaque trame. Celle qui nous intéresse contient 0d en hexadécimal.
+
+Les données sont ensuite récupéré avec les calcules suivant:
+
+- Température : (trame[22] * 256 + trame[21]) / 10
+- Humidité : (trame[24] * 256 + trame[23]) / 10
+
 La carte enverra ensuite les données sur un topic MQTT : 
 
 - NB-CB_temperature
@@ -80,6 +116,10 @@ Pour ce faire, elle utilise la Wi-Fi pour envoyer les données vers le serveur M
 
 #### Fonctionnement du code
 
+##### Librairies utilisées:
+- [EspMQTTClient](https://github.com/plapointe6/EspMQTTClient) pour la connexion wifi et MQTT
+
+##### Explication:
 Le main.cpp à deux méthodes : celle de setup des variables et celle qui permet de faire boucler le code sur la carte.
 Dans le setup, nous créons un thread pour la gestion du bluetooth avec un listener qui enverra les données en Wi-Fi lors de leur réception.
 Les boutons sur la carte ne sont pas attribués mais peuvent être utilisés dans le cadre d'une amélioration via les deux handlers dans le code.
@@ -97,6 +137,10 @@ Le code que nous avons créé se base sur celui des exemples fournis par l'IDE S
 
 #### Fonctionnement du code
 
+##### Librairies utilisées:
+- [LWIP](https://www.nongnu.org/lwip/2_0_x/group__mqtt.html) pour la connexion MQTT
+- lcd_log.h pour la gestion de l'affichage
+##### Explication:
 Le fichier main.c crée un thread nommé start. Celui-ci va lancer un nouveau thread DHCP qui communiquera avec le serveur DHCP. Une fois son adresse IP attribuée, il commencera à récupérer les données de température et d'humidité via un nouveau thread nommé MQTT.
 
 **Attention** : Sur les STM32, les threads sont synchrones, il faut donc rajouter un "osDelay" qui correspond au temps accordé aux autres threads pour s'exécuter.
